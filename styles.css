@@ -1,3 +1,9 @@
 body {
   font-family: verdana;
 }
+section {
+  display: flex
+}
+section > * {
+flex:1
+}
