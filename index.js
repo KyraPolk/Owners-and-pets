@@ -16,10 +16,40 @@ app.get('/dist/main.js.map', (req, res)=> res.sendFile(reactSourceMap));
 const styleSheet = path.join(__dirname, 'styles.css');
 app.get('/styles.css', (req, res)=> res.sendFile(styleSheet));
 
-app.get("/api/owners", async(req, res, next) =>{
+//a function that takes in three parameters
+app.use(express.json());
+
+//to edit the pets..need .put
+app.put('/api/pets/:id', async(req, res, next) => {
+  try{
+    const SQL =`
+    UPDATE pets
+    SET handler_id =$1, name = $2
+    WHERE id = $3 RETURN *
+    `;
+    const response = await client.query(SQL, [req.body.handler_id, req.body.name, req.params.id]);
+    res.send(response.rows[0])
+  } catch(error){
+    next(error)
+  }
+})
+
+//for handlers
+app.get('/api/handlers', async(req, res, next) =>{
   try{
     const response = await client.query('SELECT * FROM owners');
-    res.send(response.rows)
+    res.send(response.rows);
+
+  } catch(error) {
+    next(error)
+  }
+})
+
+//for pets
+app.get('/api/pets', async(req, res, next) =>{
+  try{
+    const response = await client.query('SELECT * FROM owners');
+    res.send(response.rows);
 
   } catch(error) {
     next(error)
