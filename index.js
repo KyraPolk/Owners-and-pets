@@ -1,5 +1,5 @@
 const pg = require('pg');
-const client = new pg.Client('postgres://localhost/fullstack_template_db');
+const client = new pg.Client('postgres://localhost/owners');
 const express = require('express');
 const app = express();
 const path = require('path');
@@ -16,15 +16,43 @@ app.get('/dist/main.js.map', (req, res)=> res.sendFile(reactSourceMap));
 const styleSheet = path.join(__dirname, 'styles.css');
 app.get('/styles.css', (req, res)=> res.sendFile(styleSheet));
 
+app.get("/api/owners", async(req, res, next) =>{
+  try{
+    const response = await client.query('SELECT * FROM owners');
+    res.send(response.rows)
+
+  } catch(error) {
+    next(error)
+  }
+})
+
 const init = async()=> {
   await client.connect();
   console.log('connected to database');
   const SQL = `
-    SQL SETUP AND SEED
-  `;
-  console.log('create your tables and seed data');
+  DROP TABLE IF EXISTS pets;
+  DROP TABLE IF EXISTS handlers;
+  CREATE TABLE handlers(
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100)
+  );
+  CREATE TABLE pets(
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100),
+    handler_id INTEGER REFERENCES handlers(id)
+  );
+    INSERT INTO handlers(name) VALUES ('Sara');
+    INSERT INTO handlers(name) VALUES ('Corey');
+    INSERT INTO handlers(name) VALUES ('Eddie');
+    INSERT INTO pets(name) VALUES ('Bear');
+    INSERT INTO pets(name) VALUES ('Boots');
+    INSERT INTO pets(name) VALUES ('Spinx');
 
-  const port = process.env.PORT || 3000;
+  `;
+  //console.log('create your tables and seed data');
+  await client.query(SQL);
+
+  const port = process.env.PORT || 2600;
   app.listen(port, ()=> {
     console.log(`listening on port ${port}`);
   });
